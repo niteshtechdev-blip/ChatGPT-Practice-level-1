@@ -18,5 +18,9 @@ export const register=async(req,res)=>{
         })
     } catch (error) {
         console.log(`Register Error ${error.message}`)
+        res.status(500).json({
+            success:false,
+            message:"Registration Failed"
+        })
     }
 }

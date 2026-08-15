@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       trim: true,
+      minlength:6
     },
     age: {
       type: Number,
@@ -45,5 +46,8 @@ userSchema.pre('save',async function (){
     if(!this.isModified("password")) return;
     this.password=await bcrypt.hash(this.password,10)
 })
+userSchema.methods.isPasswordCorrect=async function(password){
+  return await bcrypt.compare(password,this.password)
+}
 
 export const UserModel=new mongoose.model("User",userSchema)
