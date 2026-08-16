@@ -54,12 +54,19 @@ export const login = async function (req, res) {
         message: "Access token or Refresh token can't generate..Please login again",
       });
     }
-    const setRefreshToken=await user.updateMany
-
-    res.status(200).json({
+    const setRefreshToken=await UserModel.updateMany({_id:user._id},{$set:{refreshToken,accessToken}})
+    const options={
+      httpOnly:true,
+      secure:true
+    }
+    res.status(200)
+    .cookie("accessToken",accessToken,options)
+    .cookie("refreshToken",refreshToken,options)
+    .json({
       success: true,
       message: "Login success",
-      Refresh_Token: refreshToken,
+      refresh_and_access_token_update:setRefreshToken,
+      // Refresh_Token: refreshToken,
     });
     console.log("login success");
   } catch (error) {
