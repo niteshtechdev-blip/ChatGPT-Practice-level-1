@@ -5,10 +5,12 @@ import { mongo } from 'mongoose'
 import { connectDB } from './db/connect.db.js'
 import userRoutes from './routes/user.routes.js'
 import { UserModel } from './models/user.model.js'
+import cookieParser from 'cookie-parser'
 //config
 dotenv.config()
 app.use(express.json())
 app.use(express.urlencoded({extended:false}))
+app.use(cookieParser())
 
 // DataBase Connection
 
@@ -20,21 +22,21 @@ app.use('/api/users',userRoutes)
 app.get('/',(req,res)=>{
     res.send("Welcome")
 })
-app.post('/check',async(req,res)=>{
-    try {
-        const {password,userId}=req.body
-        const user=await UserModel.findById(userId)
-        const resultOfIsPasswordCorrect=await user.isPasswordCorrect(password)
-        res.send(resultOfIsPasswordCorrect)
-        console.log(resultOfIsPasswordCorrect)
-    } catch (error) {
-        console.log(error.message)
-        res.status(400).json({
-            success:false,
-            message:"error in check api"
-        })
-    }
-})
+// app.post('/check',async(req,res)=>{
+//     try {
+//         const {password,userId}=req.body
+//         const user=await UserModel.findById(userId)
+//         const resultOfIsPasswordCorrect=await user.isPasswordCorrect(password)
+//         res.send(resultOfIsPasswordCorrect)
+//         console.log(resultOfIsPasswordCorrect)
+//     } catch (error) {
+//         console.log(error.message)
+//         res.status(400).json({
+//             success:false,
+//             message:"error in check api"
+//         })
+//     }
+// })
 
 
 
