@@ -12,6 +12,4 @@ router.route('/update/:id').patch(userController.update)
 router.route('/delete/:id').post(userController.deleteUser)
 router.route('/search').post(userController.search)
 
-// 
-
 export default router

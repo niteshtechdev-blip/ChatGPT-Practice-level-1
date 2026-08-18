@@ -4,5 +4,6 @@ const router=Router()
 
 router.route('/').get(productController.home)
 router.route('/add').post(productController.productAdd)
+router.route('/read').get(productController.productRead)
 
 export default router
