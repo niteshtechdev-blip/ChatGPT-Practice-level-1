@@ -40,10 +40,15 @@ const productSchema=new mongoose.Schema({
      rating:{
         type:Number,
         min:0,
-        max:5
+        max:5,
+        default:0
     },
      isAvailable:{
         type:Boolean,
+         enum:{
+            values:[true,false,'coming soon'],
+            message:'{value} is not valid category'
+        },
         default:true
     },
 },{timestamps:true})
