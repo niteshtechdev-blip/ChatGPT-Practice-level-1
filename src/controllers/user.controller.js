@@ -1,8 +1,17 @@
 import { UserModel } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import { ApiError } from "../utils/ApiError.js";
+
+
+// -------------Home--------------
+
 export const home = async (req, res) => {
   res.send("This is Api User home page");
 };
+
+
+// ------------------Register------------------
+
 
 export const register = async (req, res) => {
   try {
@@ -28,6 +37,10 @@ export const register = async (req, res) => {
     });
   }
 };
+
+
+// ------------------LOGIN-------------------
+
 
 export const login = async function (req, res) {
   try {
@@ -82,6 +95,8 @@ export const login = async function (req, res) {
     });
   }
 };
+
+// -----------------Cookie Access Api-------------------
 
 export const accessCookie = async (req, res) => {
   console.log(req.cookie.refreshToken);
@@ -161,3 +176,51 @@ export const update = async (req, res) => {
     });
   }
 };
+
+
+
+// --------------Delete Api ------------------
+
+export const deleteUser=async(req,res)=>{
+  try {
+    const deletedUser= await UserModel.findByIdAndDelete(req.params.id)
+    console.log(deletedUser)
+    if(!deletedUser){
+      return res.status(404).json({
+      success:false,
+      message:"can't find user for delete"
+    })
+    }
+     res.status(200).json({
+      success:true,
+      message:"Delete Success",
+      Deleted_User:deletedUser
+    })
+  } catch (error) {
+    console.log(`Error while delete ${error.message}`)
+    res.status(500).json({
+      success:false,
+      message:"User can't delete"
+    })
+  }
+}
+
+
+
+export const demo=async(req,res)=>{
+  try {
+    const querydata=req.query
+    const user=await UserModel.find(querydata)
+    if(user.length===0){
+      throw new ApiError(404,"No data Found")
+    }
+    res.status(200).json({
+      success:true,
+      message:"Seatch Success",
+      data:[user]
+    })
+  } catch (error) {
+    console.log(`Error in search ${error.message}`)
+    res.send(error)
+  }
+}
