@@ -1,16 +1,16 @@
 import { Router } from "express";
-import * as controllers from "../controllers/user.controller.js"
+import * as userController from "../controllers/user.controller.js"
 const router=Router()
 
-router.route('/').get(controllers.home)
-router.route('/register').post(controllers.register)
-router.route('/login').post(controllers.login)
-router.route('/get-cookie').get(controllers.accessCookie)
-router.route('/read').get(controllers.read)
-router.route('/read/:id').post(controllers.readById)
-router.route('/update/:id').patch(controllers.update)
-router.route('/delete/:id').post(controllers.deleteUser)
-router.route('/demo').post(controllers.demo)
+router.route('/').get(userController.home)
+router.route('/register').post(userController.register)
+router.route('/login').post(userController.login)
+router.route('/get-cookie').get(userController.accessCookie)
+router.route('/read').get(userController.read)
+router.route('/read/:id').post(userController.readById)
+router.route('/update/:id').patch(userController.update)
+router.route('/delete/:id').post(userController.deleteUser)
+router.route('/search').post(userController.search)
 
 // 
 

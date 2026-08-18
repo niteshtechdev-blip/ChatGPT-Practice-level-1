@@ -207,17 +207,25 @@ export const deleteUser=async(req,res)=>{
 
 
 
-export const demo=async(req,res)=>{
+export const search=async(req,res)=>{
   try {
     const querydata=req.query
-    const user=await UserModel.find(querydata)
+   const [key, value] = Object.entries(querydata)[0];
+
+    const user = await UserModel.find({
+      [key]: {
+        $regex: value,
+        $options: "i"
+      }
+    });
     if(user.length===0){
       throw new ApiError(404,"No data Found")
     }
     res.status(200).json({
       success:true,
       message:"Seatch Success",
-      data:[user]
+      data:[user],
+      query:querydata
     })
   } catch (error) {
     console.log(`Error in search ${error.message}`)

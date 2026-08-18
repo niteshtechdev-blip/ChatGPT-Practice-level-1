@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import { mongo } from 'mongoose'
 import { connectDB } from './db/connect.db.js'
 import userRoutes from './routes/user.routes.js'
+import productRoutes from './routes/product.routes.js'
 import { UserModel } from './models/user.model.js'
 import cookieParser from 'cookie-parser'
 //config
@@ -18,6 +19,7 @@ connectDB();
 
 //routes
 app.use('/api/users',userRoutes)
+app.use('/api/product',productRoutes)
 
 app.get('/',(req,res)=>{
     res.send("Welcome")
