@@ -9,4 +9,5 @@ router.route('/read/:id').post(productController.productReadOne)
 router.route('/update/:id').patch(productController.productUpdate)
 router.route('/delete/:id').delete(productController.productDelete)
 
+
 export default router

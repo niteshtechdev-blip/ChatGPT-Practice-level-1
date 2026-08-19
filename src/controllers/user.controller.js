@@ -206,6 +206,7 @@ export const deleteUser=async(req,res)=>{
 }
 
 
+// ------------search--------------
 
 export const search=async(req,res)=>{
   try {
@@ -230,5 +231,38 @@ export const search=async(req,res)=>{
   } catch (error) {
     console.log(`Error in search ${error.message}`)
     res.send(error)
+  }
+}
+
+//---------logout----
+
+export const logout=async(req,res)=>{
+  try {
+    const user= req.user
+    if(!user){
+      res.status(404).json({
+        success:false,
+        message:"user not available"
+      })
+    }
+    console.log(`Logdin user :${user.name}`)
+
+    // clearing Access and refresh token from database
+
+    user.refreshToken=""
+    user.accessToken=""
+    await user.save()
+
+    //Clearing cookies
+
+    req.cookies.accessToken=""
+    req.cookies.refreshToken=""
+
+    res.status(200).json({
+      success:true,
+      message:"Logout success"
+    })
+  } catch (error) {
+    console.log(error?.message|| "Error in logout")
   }
 }

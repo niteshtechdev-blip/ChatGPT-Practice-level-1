@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as userController from "../controllers/user.controller.js"
+import { verifyJWT } from "../middleware/auth.middleware.js";
 const router=Router()
 
 router.route('/').get(userController.home)
@@ -11,5 +12,6 @@ router.route('/read/:id').post(userController.readById)
 router.route('/update/:id').patch(userController.update)
 router.route('/delete/:id').post(userController.deleteUser)
 router.route('/search').post(userController.search)
+router.route('/logout').post(verifyJWT,userController.logout)
 
 export default router
