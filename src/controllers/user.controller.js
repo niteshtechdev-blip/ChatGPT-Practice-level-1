@@ -1,7 +1,7 @@
 import { UserModel } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { ApiError } from "../utils/ApiError.js";
-
+import jwt from 'jsonwebtoken'
 // -------------Home--------------
 
 export const home = async (req, res) => {
@@ -278,3 +278,51 @@ export const logout = async (req, res) => {
     console.log(error?.message || "Error in logout");
   }
 };
+
+
+export const refressAccessToken = async (req, res) => {
+  try {
+    const incomingRefreshToken=req.cookies?.refreshToken;
+    if(!incomingRefreshToken){
+      return res.status(401).json({
+          message:"Refresh token not found in cookies"
+      })
+    }
+
+    const decodedToken=jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET,)
+    const user=await UserModel.findById(decodedToken._id)
+    if(!user || user.refreshToken!==incomingRefreshToken){
+      return res.status(401).json({
+        message:"Invalid refresh token"
+      })
+    }
+
+    const newAccessToken=await user.generateAccessToken()
+    const newRefreshToken=await user.generateRefreshToken()
+    user.refreshToken=newRefreshToken
+    await user.save()  
+
+    const options={
+      httpOnly:true,
+      secure:true
+    }
+    res.status(200)
+    .cookie("accessToken",newAccessToken,options)
+    .cookie("refreshToken",newRefreshToken,options)
+    .json({
+      success:true,
+      message:"Access token refreshed successfully",
+      newAccessToken:newAccessToken,
+      newRefreshToken:newRefreshToken
+    })
+
+
+  }catch(error){
+    console.log(`Error in refresh access token ${error?.message}`);
+    res.status(500).json({
+      success:false,
+      message:"Failed to refresh access token"
+    })
+  }
+
+  }

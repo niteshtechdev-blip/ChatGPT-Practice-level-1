@@ -13,5 +13,6 @@ router.route('/update/:id').patch(userController.update)
 router.route('/delete/:id').post(userController.deleteUser)
 router.route('/search').post(userController.search)
 router.route('/logout').post(verifyJWT,userController.logout)
+router.route('/refresh-token').post(userController.refressAccessToken)
 
 export default router

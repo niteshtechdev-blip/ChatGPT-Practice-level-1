@@ -26,7 +26,7 @@ export const verifyJWT=async(req, res,next)=>{
         console.log(`Error in Auth middleware:${error}`)
         res.status(404).json({
             success:false,
-            message:`authentication issue`
+            message:`Access Token expired or Invalid, please refresh your access token.(Route=/refresh-token) ${error?.message}`
         })
     }
 }
