@@ -261,7 +261,7 @@ export const logout = async (req, res) => {
     await UserModel.findByIdAndUpdate(
       req.user._id,
       { $set: { refreshToken: undefined } },
-      { new: true },
+      { returnDocument: true },
     );
     const options={
       httpOnly:true,

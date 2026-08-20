@@ -2,15 +2,15 @@ import jwt from 'jsonwebtoken'
 import { UserModel } from "../models/user.model.js";
 export const verifyJWT=async(req, res,next)=>{
     try {
-        const token=req.cookies?.accessToken || req.header("Authorization").replace("Bearer ","");
+        const token=req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","");
         if(!token){
             console.log("Token is not in cookies")
-           return res.status(404).json({
+            return res.status(404).json({
                 success:false,
                 message:"Unauthorized Request"
             })
         }
-        const decodedToken =await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
+        const decodedToken =jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
         if(!decodedToken){
             console.log("Invaalid Token")
             return res.status(401).json({
@@ -23,6 +23,10 @@ export const verifyJWT=async(req, res,next)=>{
         req.user=user
         next();
     } catch (error) {
-        console.log(`${error?.message|| "Error in auth middleware"}`)
+        console.log(`Error in Auth middleware:${error}`)
+        res.status(404).json({
+            success:false,
+            message:`authentication issue`
+        })
     }
 }
