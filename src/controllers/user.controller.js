@@ -2,16 +2,13 @@ import { UserModel } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { ApiError } from "../utils/ApiError.js";
 
-
 // -------------Home--------------
 
 export const home = async (req, res) => {
   res.send("This is Api User home page");
 };
 
-
 // ------------------Register------------------
-
 
 export const register = async (req, res) => {
   try {
@@ -38,13 +35,18 @@ export const register = async (req, res) => {
   }
 };
 
-
 // ------------------LOGIN-------------------
-
 
 export const login = async function (req, res) {
   try {
     const { email, password } = req.body;
+    if(password==undefined|| email==undefined){
+      return res.status(400).json({
+        success: false,
+        deme:dsds,
+        message: (email==undefined)?`Please enter email`:`please enter password`
+      });
+    }
     const user = await UserModel.findOne({ email: email });
     if (!user) {
       return res.status(401).json({
@@ -70,7 +72,7 @@ export const login = async function (req, res) {
     }
     const setRefreshToken = await UserModel.updateMany(
       { _id: user._id },
-      { $set: { refreshToken, accessToken } },
+      { $set: { refreshToken } },
     );
     const options = {
       httpOnly: true,
@@ -85,6 +87,7 @@ export const login = async function (req, res) {
         message: "Login success",
         refresh_and_access_token_update: setRefreshToken,
         // Refresh_Token: refreshToken,
+        // new_cookies:req.cookies.accessToken
       });
     console.log("login success");
   } catch (error) {
@@ -177,92 +180,101 @@ export const update = async (req, res) => {
   }
 };
 
-
-
 // --------------Delete Api ------------------
 
-export const deleteUser=async(req,res)=>{
+export const deleteUser = async (req, res) => {
   try {
-    const deletedUser= await UserModel.findByIdAndDelete(req.params.id)
-    console.log(deletedUser)
-    if(!deletedUser){
+    const deletedUser = await UserModel.findByIdAndDelete(req.params.id);
+    console.log(deletedUser);
+    if (!deletedUser) {
       return res.status(404).json({
-      success:false,
-      message:"can't find user for delete"
-    })
+        success: false,
+        message: "can't find user for delete",
+      });
     }
-     res.status(200).json({
-      success:true,
-      message:"Delete Success",
-      Deleted_User:deletedUser
-    })
+    res.status(200).json({
+      success: true,
+      message: "Delete Success",
+      Deleted_User: deletedUser,
+    });
   } catch (error) {
-    console.log(`Error while delete ${error.message}`)
+    console.log(`Error while delete ${error.message}`);
     res.status(500).json({
-      success:false,
-      message:"User can't delete"
-    })
+      success: false,
+      message: "User can't delete",
+    });
   }
-}
-
+};
 
 // ------------search--------------
 
-export const search=async(req,res)=>{
+export const search = async (req, res) => {
   try {
-    const querydata=req.query
-   const [key, value] = Object.entries(querydata)[0];
+    const querydata = req.query;
+    const [key, value] = Object.entries(querydata)[0];
 
     const user = await UserModel.find({
       [key]: {
         $regex: value,
-        $options: "i"
-      }
+        $options: "i",
+      },
     });
-    if(user.length===0){
-      throw new ApiError(404,"No data Found")
+    if (user.length === 0) {
+      throw new ApiError(404, "No data Found");
     }
     res.status(200).json({
-      success:true,
-      message:"Seatch Success",
-      data:[user],
-      query:querydata
-    })
+      success: true,
+      message: "Seatch Success",
+      data: [user],
+      query: querydata,
+    });
   } catch (error) {
-    console.log(`Error in search ${error.message}`)
-    res.send(error)
+    console.log(`Error in search ${error.message}`);
+    res.send(error);
   }
-}
+};
 
 //---------logout----
 
-export const logout=async(req,res)=>{
+export const logout = async (req, res) => {
   try {
-    const user= req.user
-    if(!user){
-      res.status(404).json({
-        success:false,
-        message:"user not available"
-      })
+    // const user= req.user
+    // // clearing Access and refresh token from database
+
+    // user.refreshToken=undefined
+    // user.accessToken=undefined
+    // await user.save()
+
+    // const options={
+    //   httpOnly:true,
+    //   secure:true
+    // }
+
+    // res.status(200)
+    // .clearCookie("accessToken",options)
+    // .clearCookie("refreshToken",options)
+    // .json({
+    //   success:true,
+    //   message:"Logout success"
+    // })
+
+    await UserModel.findByIdAndUpdate(
+      req.user._id,
+      { $set: { refreshToken: undefined } },
+      { new: true },
+    );
+    const options={
+      httpOnly:true,
+      secure:true
     }
-    console.log(`Logdin user :${user.name}`)
-
-    // clearing Access and refresh token from database
-
-    user.refreshToken=""
-    user.accessToken=""
-    await user.save()
-
-    //Clearing cookies
-
-    req.cookies.accessToken=""
-    req.cookies.refreshToken=""
-
-    res.status(200).json({
+    return res.status(200)
+    .clearCookie("accessToken",options)
+    .clearCookie("refreshToken",options)
+    .json({
       success:true,
-      message:"Logout success"
+      message:"User Logout success"
     })
   } catch (error) {
-    console.log(error?.message|| "Error in logout")
+    console.log(error?.message || "Error in logout");
   }
-}
+};
