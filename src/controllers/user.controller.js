@@ -2,6 +2,8 @@ import { UserModel } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
+
+
 // -------------Home--------------
 
 export const home = async (req, res) => {
@@ -346,3 +348,38 @@ export const currentUser = async (req, res) => {
     })
   }
 };
+
+
+
+
+
+// ------------Change Password -----------
+
+export const changePassword=async (req,res)=>{
+  try {
+    const {oldPassword,newPassword}=req.body
+    const user=await UserModel.findById(req.user?._id)
+    if(!oldPassword && !newPassword){
+      throw new ApiError(400,`Old Password And New Passwaord is required`)
+    }
+    const isOldPasswordCorrect=await user.isPasswordCorrect(oldPassword)
+    if(!isOldPasswordCorrect){
+      throw new ApiError(401,`Old Password is Not Correct`)
+    }
+    user.password=newPassword
+    await user.save()
+
+    res.status(200).json({
+      success:true,
+      message:`Password Changed Success`,
+      newPassword
+    })
+
+        
+  } catch (error) {
+    res.status(error?.statusCode||401).json({
+      success:false,
+      message:error?.message||"Unauthorized request",
+    })
+  }
+}

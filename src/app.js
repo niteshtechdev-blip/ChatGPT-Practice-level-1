@@ -24,6 +24,7 @@ app.use('/api/product',productRoutes)
 app.get('/',(req,res)=>{
     res.send("Welcome")
 })
+
 // app.post('/check',async(req,res)=>{
 //     try {
 //         const {password,userId}=req.body

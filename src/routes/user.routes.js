@@ -12,8 +12,13 @@ router.route('/read/:id').post(userController.readById)
 router.route('/update/:id').patch(userController.update)
 router.route('/delete/:id').post(userController.deleteUser)
 router.route('/search').post(userController.search)
+
+
+//Secured Routes (Mean if user logedin then these routes will work)
 router.route('/logout').post(verifyJWT,userController.logout)
 router.route('/refresh-token').post(userController.refreshAccessToken)
 router.route('/current-user').get(verifyJWT,userController.currentUser)
+router.route('/change-password').post(verifyJWT,userController.changePassword)
+
 
 export default router

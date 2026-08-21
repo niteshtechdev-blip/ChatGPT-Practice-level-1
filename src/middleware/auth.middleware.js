@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken'
 import { UserModel } from "../models/user.model.js";
 import { ApiError } from '../utils/ApiError.js';
+
+
 export const verifyJWT=async(req, res,next)=>{
     try {
         const token=req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","");
@@ -29,3 +31,33 @@ export const verifyJWT=async(req, res,next)=>{
         })
     }
 }
+
+
+
+
+// -------------Auth Middleware Rewrite for Practice-----------
+
+
+// export const verifyJWT=async(req, res,next)=>{
+//     try {
+//         const token=req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
+//         if(!token){
+//             throw new ApiError(401,"Token Not Found")
+//         }
+
+//         const decodedToken=jwt.verify(token,process.env.ACCESS_TOKEN_SECRET)
+//         const user=await UserModel.findById(decodedToken?._id)
+//         if(!user){
+//             throw new ApiError(401,`Invalid Token`)
+//         }
+//         req.user=user
+//         next()
+
+
+//     } catch (error) {
+//         res.status(error?.statusCode || 401).json({
+//             success:false,
+//             message:error?.message ||`Unauthorized request`
+//         })
+//     }
+// }
