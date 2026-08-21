@@ -302,31 +302,47 @@ export const refreshAccessToken = async (req, res) => {
       throw new ApiError(401, "Invalid refresh token");
     }
 
-    const newAccessToken=await user.generateAccessToken()
-    const newRefreshToken=await user.generateRefreshToken()
-    user.refreshToken=newRefreshToken;
+    const newAccessToken = await user.generateAccessToken();
+    const newRefreshToken = await user.generateRefreshToken();
+    user.refreshToken = newRefreshToken;
     await user.save();
-     
-    const options={
-      httpOnly:true,
-      secure:true
-    }
-    res.status(200)
-    .cookie("refreshToken",newRefreshToken,options)
-    .cookie("accessToken",newAccessToken,options)
-    .json({
-      success:true,
-      message:"Access Token Refreshed successfully",
-      newAccessToken,
-      newRefreshToken
-    })
 
-
-
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+    res
+      .status(200)
+      .cookie("refreshToken", newRefreshToken, options)
+      .cookie("accessToken", newAccessToken, options)
+      .json({
+        success: true,
+        message: "Access Token Refreshed successfully",
+        newAccessToken,
+        newRefreshToken,
+      });
   } catch (error) {
     res.status(error.statusCode || 500).json({
       success: false,
       message: error?.message || "Failed to refresh access token",
     });
+  }
+};
+
+// -----------Get current User (logedin user)---------
+
+export const currentUser = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.user?._id).select("-password -createdAt -updatedAt -__v -accessToken -refreshToken")
+    res.status(200).json({
+      success:true,
+      message:`Current User Found`,
+      user
+    })
+  } catch (error) {
+    res.status(404).json({
+      success:false,
+      message:`${error?.message|| `Current User Not Found`}`
+    })
   }
 };
