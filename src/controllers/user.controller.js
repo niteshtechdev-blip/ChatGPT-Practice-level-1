@@ -1,7 +1,7 @@
 import { UserModel } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { ApiError } from "../utils/ApiError.js";
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
 // -------------Home--------------
 
 export const home = async (req, res) => {
@@ -40,11 +40,12 @@ export const register = async (req, res) => {
 export const login = async function (req, res) {
   try {
     const { email, password } = req.body;
-    if(password==undefined|| email==undefined){
+    if (password == undefined || email == undefined) {
       return res.status(400).json({
         success: false,
-        deme:dsds,
-        message: (email==undefined)?`Please enter email`:`please enter password`
+        deme: dsds,
+        message:
+          email == undefined ? `Please enter email` : `please enter password`,
       });
     }
     const user = await UserModel.findOne({ email: email });
@@ -263,66 +264,69 @@ export const logout = async (req, res) => {
       { $set: { refreshToken: undefined } },
       { returnDocument: true },
     );
-    const options={
-      httpOnly:true,
-      secure:true
-    }
-    return res.status(200)
-    .clearCookie("accessToken",options)
-    .clearCookie("refreshToken",options)
-    .json({
-      success:true,
-      message:"User Logout success"
-    })
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+    return res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json({
+        success: true,
+        message: "User Logout success",
+      });
   } catch (error) {
     console.log(error?.message || "Error in logout");
   }
 };
 
+// -----------Refresh Access Token --------------------
 
-export const refressAccessToken = async (req, res) => {
+export const refreshAccessToken = async (req, res) => {
   try {
-    const incomingRefreshToken=req.cookies?.refreshToken;
-    if(!incomingRefreshToken){
-      return res.status(401).json({
-          message:"Refresh token not found in cookies"
-      })
+    const incomingRefreshToken =
+      req.cookies?.refreshToken || req.body?.refreshToken;
+    if (!incomingRefreshToken) {
+      throw new ApiError(
+        401,
+        "Refresh token not found in cookies or request body",
+      );
     }
-
-    const decodedToken=jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET,)
-    const user=await UserModel.findById(decodedToken._id)
-    if(!user || user.refreshToken!==incomingRefreshToken){
-      return res.status(401).json({
-        message:"Invalid refresh token"
-      })
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+    );
+    const user = await UserModel.findById(decodedToken?._id);
+    if (!user || user.refreshToken !== incomingRefreshToken) {
+      throw new ApiError(401, "Invalid refresh token");
     }
 
     const newAccessToken=await user.generateAccessToken()
     const newRefreshToken=await user.generateRefreshToken()
-    user.refreshToken=newRefreshToken
-    await user.save()  
-
+    user.refreshToken=newRefreshToken;
+    await user.save();
+     
     const options={
       httpOnly:true,
       secure:true
     }
     res.status(200)
-    .cookie("accessToken",newAccessToken,options)
     .cookie("refreshToken",newRefreshToken,options)
+    .cookie("accessToken",newAccessToken,options)
     .json({
       success:true,
-      message:"Access token refreshed successfully",
-      newAccessToken:newAccessToken,
-      newRefreshToken:newRefreshToken
+      message:"Access Token Refreshed successfully",
+      newAccessToken,
+      newRefreshToken
     })
 
 
-  }catch(error){
-    console.log(`Error in refresh access token ${error?.message}`);
-    res.status(500).json({
-      success:false,
-      message:"Failed to refresh access token"
-    })
-  }
 
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error?.message || "Failed to refresh access token",
+    });
   }
+};
