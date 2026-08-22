@@ -25,22 +25,6 @@ app.get('/',(req,res)=>{
     res.send("Welcome")
 })
 
-// app.post('/check',async(req,res)=>{
-//     try {
-//         const {password,userId}=req.body
-//         const user=await UserModel.findById(userId)
-//         const resultOfIsPasswordCorrect=await user.isPasswordCorrect(password)
-//         res.send(resultOfIsPasswordCorrect)
-//         console.log(resultOfIsPasswordCorrect)
-//     } catch (error) {
-//         console.log(error.message)
-//         res.status(400).json({
-//             success:false,
-//             message:"error in check api"
-//         })
-//     }
-// })
-
 
 
 

@@ -10,4 +10,4 @@ const subscriptionSchema=new mongoose.Schema({
     }
 },{timestamps:true})
 
-export const subscriptionModel =mongoose.model("subscriber",subscriptionSchema)
+export const subscriptionModel =mongoose.model("subscriber",subscriptionSchema) 
