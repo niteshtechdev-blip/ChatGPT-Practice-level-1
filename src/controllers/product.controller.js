@@ -1,4 +1,6 @@
 import { ProductModal } from "../models/product.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { uploadOnCludinary } from "../utils/uploadOnCloudinary.js";
 
 export const home = async (req, res) => {
   res.send("I am product home");
@@ -174,3 +176,32 @@ export const productDelete = async (req, res) => {
   }
 };
 
+
+
+
+//---------------product image-------------
+
+export const productImage = async (req, res) => {
+  try {
+    const cloudinary_folder='productImages'
+    const newProductImage=req.files?.productImage[0].path
+    const product=await ProductModal.findById(req.body?.productId)
+    console.log(newProductImage)
+    if(!product){
+      // console.log("No such product found by given id")
+      throw new ApiError(404,"Id not correct")
+    }
+    const result= await uploadOnCludinary(newProductImage)
+    product.productImage=result.url
+    await product.save()
+    res.status(200).json({
+      success:true,
+      message:`product image updated successfully`
+    })
+  } catch (error) {
+    res.status(error?.statuCode || 401).json({
+        success:false,
+        message:`${error?.message}....Error in uploading product image`  || `No product found by given id`
+      })
+  }
+}

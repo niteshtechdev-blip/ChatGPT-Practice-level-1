@@ -2,6 +2,7 @@ import { UserModel } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
+import { uploadOnCludinary } from "../utils/uploadOnCloudinary.js";
 
 
 // -------------Home--------------
@@ -382,4 +383,57 @@ export const changePassword=async (req,res)=>{
       message:error?.message||"Unauthorized request",
     })
   }
+}
+
+// ----------Upload Avatar Photo----------
+
+export const uploadAvatar=async (req,res)=>{
+ try {
+   const avatarLocalPath=req.files?.avatar[0].path
+   if(!avatarLocalPath){
+     throw new ApiError(404,"Avatar not found in LocalPath")
+   }
+   const result=await uploadOnCludinary(avatarLocalPath)   
+   const user=await UserModel.findById(req.user?._id)
+   user.avatar=result.url
+   await user.save({validateBeforeSave:false})
+   res.status(200).json({
+    success:true,
+    message:`Avatar Uploaded Successfully on Cloudinary and Saved in DB`,
+    avatar_URL:result.url
+   })
+
+
+ } catch (error) {
+  res.status(error?.ststusCode || 500).json({
+    success:false,
+    message:`${error?.message} || Error while changeing Avatar`
+  }) 
+ }
+}
+// -----------------Coverimage-------------------
+
+export const uploadCoverImage=async (req,res)=>{
+ try {
+   const coverImageLocalPath=req.files?.coverImage[0].path
+   if(!coverImageLocalPath){
+     throw new ApiError(404,"Cover Image not found in LocalPath")
+   }
+   const result=await uploadOnCludinary(coverImageLocalPath)   
+   const user=await UserModel.findById(req.user?._id)
+   user.coverImage=result.url
+   await user.save({validateBeforeSave:false})
+   res.status(200).json({
+    success:true,
+    message:`cover image Uploaded Successfully on Cloudinary and Saved in DB`,
+    CoverImage_URL:result.url
+   })
+
+
+ } catch (error) {
+  res.status(error?.ststusCode || 500).json({
+    success:false,
+    message:`${error?.message} || Error while changeing Cover image`
+  }) 
+ }
 }

@@ -43,6 +43,12 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
+    avatar:{
+      type:String
+    },
+    coverImage:{
+      type:String
+    }
   },
   { timestamps: true },
 );
