@@ -359,7 +359,7 @@ export const changePassword=async (req,res)=>{
   try {
     const {oldPassword,newPassword}=req.body
     const user=await UserModel.findById(req.user?._id)
-    if(!oldPassword && !newPassword){
+    if(!oldPassword || !newPassword){
       throw new ApiError(400,`Old Password And New Passwaord is required`)
     }
     const isOldPasswordCorrect=await user.isPasswordCorrect(oldPassword)
