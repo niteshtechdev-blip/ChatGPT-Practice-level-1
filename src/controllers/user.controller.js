@@ -4,7 +4,6 @@ import { ApiError } from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
 import { uploadOnCludinary } from "../utils/uploadOnCloudinary.js";
 
-
 // -------------Home--------------
 
 export const home = async (req, res) => {
@@ -336,104 +335,145 @@ export const refreshAccessToken = async (req, res) => {
 
 export const currentUser = async (req, res) => {
   try {
-    const user = await UserModel.findById(req.user?._id).select("-password -createdAt -updatedAt -__v -accessToken -refreshToken")
+    const user = await UserModel.findById(req.user?._id).select(
+      "-password -createdAt -updatedAt -__v -accessToken -refreshToken",
+    );
     res.status(200).json({
-      success:true,
-      message:`Current User Found`,
-      user
-    })
+      success: true,
+      message: `Current User Found`,
+      user,
+    });
   } catch (error) {
     res.status(404).json({
-      success:false,
-      message:`${error?.message|| `Current User Not Found`}`
-    })
+      success: false,
+      message: `${error?.message || `Current User Not Found`}`,
+    });
   }
 };
 
-
-
-
-
 // ------------Change Password -----------
 
-export const changePassword=async (req,res)=>{
+export const changePassword = async (req, res) => {
   try {
-    const {oldPassword,newPassword}=req.body
-    const user=await UserModel.findById(req.user?._id)
-    if(!oldPassword || !newPassword){
-      throw new ApiError(400,`Old Password And New Passwaord is required`)
+    const { oldPassword, newPassword } = req.body;
+    const user = await UserModel.findById(req.user?._id);
+    if (!oldPassword || !newPassword) {
+      throw new ApiError(400, `Old Password And New Passwaord is required`);
     }
-    const isOldPasswordCorrect=await user.isPasswordCorrect(oldPassword)
-    if(!isOldPasswordCorrect){
-      throw new ApiError(401,`Old Password is Not Correct`)
+    const isOldPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+    if (!isOldPasswordCorrect) {
+      throw new ApiError(401, `Old Password is Not Correct`);
     }
-    user.password=newPassword
-    await user.save()
+    user.password = newPassword;
+    await user.save();
 
     res.status(200).json({
-      success:true,
-      message:`Password Changed Success`,
-      newPassword
-    })
-
-        
+      success: true,
+      message: `Password Changed Success`,
+      newPassword,
+    });
   } catch (error) {
-    res.status(error?.statusCode||401).json({
-      success:false,
-      message:error?.message||"Unauthorized request",
-    })
+    res.status(error?.statusCode || 401).json({
+      success: false,
+      message: error?.message || "Unauthorized request",
+    });
   }
-}
+};
 
 // ----------Upload Avatar Photo----------
 
-export const uploadAvatar=async (req,res)=>{
- try {
-   const avatarLocalPath=req.files?.avatar[0].path
-   if(!avatarLocalPath){
-     throw new ApiError(404,"Avatar not found in LocalPath")
-   }
-   const result=await uploadOnCludinary(avatarLocalPath)   
-   const user=await UserModel.findById(req.user?._id)
-   user.avatar=result.url
-   await user.save({validateBeforeSave:false})
-   res.status(200).json({
-    success:true,
-    message:`Avatar Uploaded Successfully on Cloudinary and Saved in DB`,
-    avatar_URL:result.url
-   })
+export const uploadAvatar = async (req, res) => {
+  try {
+    const avatarLocalPath = req.files?.avatar[0].path;
+    if (!avatarLocalPath) {
+      throw new ApiError(404, "Avatar not found in LocalPath");
+    }
+    const result = await uploadOnCludinary(avatarLocalPath);
+    const user = await UserModel.findById(req.user?._id);
+    user.avatar = result.url;
+    await user.save({ validateBeforeSave: false });
+    res.status(200).json({
+      success: true,
+      message: `Avatar Uploaded Successfully on Cloudinary and Saved in DB`,
+      avatar_URL: result.url,
+    });
+  } catch (error) {
+    res.status(error?.ststusCode || 500).json({
+      success: false,
+      message: `${error?.message} || Error while changeing Avatar`,
+    });
+  }
+};
+// -----------------Upload Coverimage-------------------
 
+export const uploadCoverImage = async (req, res) => {
+  try {
+    const coverImageLocalPath = req.files?.coverImage[0].path;
+    if (!coverImageLocalPath) {
+      throw new ApiError(404, "Cover Image not found in LocalPath");
+    }
+    const result = await uploadOnCludinary(coverImageLocalPath);
+    const user = await UserModel.findById(req.user?._id);
+    user.coverImage = result.url;
+    await user.save({ validateBeforeSave: false });
+    res.status(200).json({
+      success: true,
+      message: `cover image Uploaded Successfully on Cloudinary and Saved in DB`,
+      CoverImage_URL: result.url,
+    });
+  } catch (error) {
+    res.status(error?.ststusCode || 500).json({
+      success: false,
+      message: `${error?.message} || Error while changeing Cover image`,
+    });
+  }
+};
 
- } catch (error) {
-  res.status(error?.ststusCode || 500).json({
-    success:false,
-    message:`${error?.message} || Error while changeing Avatar`
-  }) 
- }
-}
-// -----------------Coverimage-------------------
+// -------------------Change User Details------------
 
-export const uploadCoverImage=async (req,res)=>{
- try {
-   const coverImageLocalPath=req.files?.coverImage[0].path
-   if(!coverImageLocalPath){
-     throw new ApiError(404,"Cover Image not found in LocalPath")
-   }
-   const result=await uploadOnCludinary(coverImageLocalPath)   
-   const user=await UserModel.findById(req.user?._id)
-   user.coverImage=result.url
-   await user.save({validateBeforeSave:false})
-   res.status(200).json({
-    success:true,
-    message:`cover image Uploaded Successfully on Cloudinary and Saved in DB`,
-    CoverImage_URL:result.url
-   })
+export const changeUserDetails = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const obj = {};
+    if (name) {
+      obj["name"] = name;
+    }
+    if (email) {
+      obj["email"] = email;
+    }
+    if (password) {
+      const newPassword = await bcrypt.hash(password, 10);
+      obj["password"] = newPassword;
+    }
 
+    if (!email && !name && !password) {
+      throw new ApiError(400, "Please provide atleast one field to update");
+    }
+    const user = await UserModel.findByIdAndUpdate(
+      req.user?._id,
+      { $set: obj },
+      { returnDocument: "after" },
+    ).select("-password -createdAt -updatedAt -accessToken -refreshToken");
+    res.status(200).json({
+      success: true,
+      message: `User details updated successfully`,
+      user,
+    });
+  } catch (error) {
+    res.status(error?.statusCode || 401).json({
+      success: false,
+      message: `${error?.message}` || "Error while changing user details",
+    });
+  }
+};
 
- } catch (error) {
-  res.status(error?.ststusCode || 500).json({
-    success:false,
-    message:`${error?.message} || Error while changeing Cover image`
-  }) 
- }
-}
+// ------------------Upload Assets (Multiple Files)-------------------
+
+export const uploadAssets = async(req, res) => {
+    try {
+      const file = req.files.assets;
+      res.status(200).json({ message: "File uploaded successfully",files: file });
+    } catch (error) {
+      res.status(500).json({ message: "Error while uploading file" });
+    }
+  };

@@ -13,6 +13,7 @@ router.route('/read/:id').post(userController.readById)
 router.route('/update/:id').patch(userController.update)
 router.route('/delete/:id').post(userController.deleteUser)
 router.route('/search').post(userController.search)
+router.route('/change-details').post(verifyJWT, userController.changeUserDetails)
 
 
 //Secured Routes (Mean if user logedin then these routes will work)
@@ -26,25 +27,8 @@ router.route('/upload-avatar').post(verifyJWT,upload.fields([{name:"avatar",maxC
 router.route('/upload-coverImage').post(verifyJWT,upload.fields([{name:"coverImage",maxCount:1}]),userController.uploadCoverImage)
 
 
-
-
-
-
-
-
-
-
-
-
-
-// //file routes
-// router.route('/save-image').post(upload.fields([{name:"image",maxCount:1}]),(req,res)=>{
-//     res.status(200).json({
-//         success:true,
-//         message:"File Saved in public folder",
-//         // imagepath:req.files?.image
-//     })
-// })
+//public assets route
+router.route('/upload-assets').post(verifyJWT,upload.fields([{name:"assets",maxCount:5}]),userController.uploadAssets)
 
 
 
